@@ -366,6 +366,97 @@
 (function(angular) {
     'use strict';
 
+    angular.module('esri.map').directive('esriGraphicsLayer', function ($q) {
+        // this object will tell angular how our directive behaves
+        return {
+            // only allow esriGraphicsLayer to be used as an element (<esri-graphics-layer>)
+            restrict: 'E',
+
+            // require the esriGraphicsLayer to have its own controller as well an esriMap controller
+            // you can access these controllers in the link function
+            require: ['esriGraphicsLayer', '^esriMap'],
+
+            // replace this element with our template.
+            // since we aren't declaring a template this essentially destroys the element
+            replace: true,
+
+            // define an interface for working with this directive
+            controller: function ($scope, $element, $attrs) {
+                var layerDeferred = $q.defer();
+
+                require([
+                    'esri/layers/GraphicsLayer'], function (GraphicsLayer) {
+                    var layer = new GraphicsLayer({id:$attrs.id});
+
+                    layerDeferred.resolve(layer);
+                });
+
+                // return the defered that will be resolved with the feature layer
+                this.getLayer = function () {
+                    return layerDeferred.promise;
+                };
+
+                // set the visibility of the feature layer
+                this.setVisible = function (isVisible) {
+                    var visibleDeferred = $q.defer();
+
+                    this.getLayer().then(function (layer) {
+                        if (isVisible) {
+                            layer.show();
+                        } else {
+                            layer.hide();
+                        }
+
+                        visibleDeferred.resolve();
+                    });
+
+                    return visibleDeferred.promise;
+                };
+            },
+
+            // now we can link our directive to the scope, but we can also add it to the map..
+            link: function (scope, element, attrs, controllers) {
+
+                // controllers is now an array of the controllers from the 'require' option
+                var layerController = controllers[0];
+                var mapController = controllers[1];
+
+                var visible = attrs.visible || 'true';
+                var isVisible = scope.$eval(visible);
+
+                // set the initial visible state of the feature layer
+                layerController.setVisible(isVisible);
+
+                // add a $watch condition on the visible attribute, if it changes and the new value is different than the previous, then use to
+                // set the visibility of the feature layer
+                scope.$watch(function () { return scope.$eval(attrs.visible); }, function (newVal, oldVal) {
+                    if (newVal !== oldVal) {
+                        layerController.setVisible(newVal);
+                    }
+                });
+
+                layerController.getLayer().then(function (layer) {
+                    // add layer
+                    mapController.addLayer(layer);
+
+                    //look for layerInfo related attributes. Add them to the map's layerInfos array for access in other components
+                    mapController.addLayerInfo({
+                      title: attrs.title || layer.name,
+                      layer: layer,
+                      defaultSymbol: (attrs.defaultSymbol) ? JSON.parse(attrs.defaultSymbol) : true
+                    });
+
+                    // return the layer
+                    return layer;
+                });
+            }
+        };
+    });
+
+})(angular);
+(function(angular) {
+    'use strict';
+
     angular.module('esri.map').directive('esriFeatureLayer', function ($q) {
         // this object will tell angular how our directive behaves
         return {
@@ -455,6 +546,237 @@
 
 })(angular);
 
+(function(angular) {
+    'use strict';
+
+    angular.module('esri.map').directive('esriSimpleRenderer', function ($q) {
+        // this object will tell angular how our directive behaves
+        return {
+            // only allow esriFeatureLayer to be used as an element (<esri-simple-renderer>)
+            restrict: 'E',
+
+            // require the esriSimpleRenderer to have its own controller as well an esriGraphicsLayer controller
+            // you can access these controllers in the link function
+            //require: ['esriSimpleRenderer', '^esriFeatureLayer'],
+            require: ['esriSimpleRenderer'],
+            
+            // replace this element with our template.
+            // since we aren't declaring a template this essentially destroys the element
+            replace: true,
+
+            // define an interface for working with this directive
+            controller: function () {
+                var rendererDeferred = $q.defer();
+
+                require([
+                    'esri/renderers/SimpleRenderer'], function (SimpleRenderer) {
+                    var renderer = new SimpleRenderer();
+
+                    rendererDeferred.resolve(renderer);
+                });
+
+                // return the defered that will be resolved with the feature layer
+                this.getRenderer = function () {
+                    return rendererDeferred.promise;
+                };
+            },
+
+            // now we can link our directive to the scope, but we can also add it to the map..
+            link: function (scope, element, attrs, controllers) {
+
+                // controllers is now an array of the controllers from the 'require' option
+                var layerDirectives = ['esriFeatureLayer', 'esriGraphicsLayer'],
+                    rendererController = controllers[0],
+                    layerController;
+                
+                // searchs for every layer directive found in array, if it's undefined, 
+                // go to the next.
+                for (var i in layerDirectives){
+                    layerController = element.parent().controller(layerDirectives[i]);
+                    if (layerController){ break; }
+                }
+
+                // gets the renderer controller
+                rendererController.getRenderer().then(function(renderer){
+
+                    // validates if the layer controller was found
+                    if (layerController){
+                        layerController.getLayer().then(function (layer) {                
+                            layer.setRenderer(renderer);
+                        });
+                    }
+
+                    // return the layer
+                    return renderer;
+                });
+            }
+        };
+    });
+
+})(angular);
+(function(angular) {
+    'use strict';
+
+        angular.module('esri.map').directive('esriSimpleFillSymbol', function ($q) {
+        // this object will tell angular how our directive behaves
+        return {
+            // only allow esriGraphicsLayer to be used as an element (<esri-graphics-layer>)
+            restrict: 'E',
+
+            // require the esriSimpleFillSymbol to have its own controller as well an esriSimpleRenderer controller
+            // you can access these controllers in the link function
+            require: ['esriSimpleFillSymbol', '^esriSimpleRenderer'],
+
+            // replace this element with our template.
+            // since we aren't declaring a template this essentially destroys the element
+            replace: true,
+
+            // define an interface for working with this directive
+            controller: function ($scope, $element, $attrs) {
+                var symbolDeferred = $q.defer();
+
+                require([
+                    'esri/Color',
+                    'esri/symbols/SimpleLineSymbol',
+                    'esri/symbols/SimpleFillSymbol'], function (
+                        Color, 
+                        SimpleLineSymbol,
+                        SimpleFillSymbol) {
+
+                    var symbol = new SimpleFillSymbol(
+                        $attrs.style ? $attrs.style : 'solid',
+                        new SimpleLineSymbol(
+                            SimpleLineSymbol.STYLE_SOLID, 
+                            new Color($attrs.lineColor ? $attrs.lineColor : '#000' ), 
+                            $attrs.lineSize ? $attrs.lineSize : 1),
+                        new Color($attrs.color ? $attrs.color : '#F00' ));
+
+                    symbolDeferred.resolve(symbol);
+                });
+
+                // return the defered that will be resolved with the feature layer
+                this.getSymbol = function () {
+                    return symbolDeferred.promise;
+                };
+            },
+
+            // now we can link our directive to the scope, but we can also add it to the map..
+            link: function (scope, element, attrs, controllers) {                
+                
+                // controllers is now an array of the controllers from the 'require' option
+                var rendererDirectives = ['esriSimpleRenderer'],
+                    rendererDirective,
+                    symbolController = controllers[0],
+                    rendererController;
+                
+                // searchs for every layer directive found in array, if it's undefined, 
+                // go to the next.
+                for (var i in rendererDirectives){
+                    rendererDirective = rendererDirectives[i];
+                    rendererController = element.parent().controller(rendererDirective);
+                    if (rendererController) { break; }
+                }
+                
+                // gets the renderer controller
+                symbolController.getSymbol().then(function(symbol){
+
+                    // validates if the renderer controller was found
+                    if (rendererController){
+                        rendererController.getRenderer().then(function (renderer) {
+                            renderer.symbol = symbol;
+                        });
+                    }
+
+                    // return the layer
+                    return symbol;
+                });
+            }
+        };
+    });
+
+})(angular);
+(function(angular) {
+    'use strict';
+
+        angular.module('esri.map').directive('esriSimpleMarkerSymbol', function ($q) {
+        // this object will tell angular how our directive behaves
+        return {
+            // only allow esriGraphicsLayer to be used as an element (<esri-graphics-layer>)
+            restrict: 'E',
+
+            // require the esriSimpleMarkerSymbol to have its own controller as well an esriSimpleRenderer controller
+            // you can access these controllers in the link function
+            require: ['esriSimpleMarkerSymbol', '^esriSimpleRenderer'],
+
+            // replace this element with our template.
+            // since we aren't declaring a template this essentially destroys the element
+            replace: true,
+
+            // define an interface for working with this directive
+            controller: function ($scope, $element, $attrs) {
+                var symbolDeferred = $q.defer();
+
+                require([
+                    'esri/Color',
+                    'esri/symbols/SimpleLineSymbol',
+                    'esri/symbols/SimpleMarkerSymbol'], function (
+                        Color, 
+                        SimpleLineSymbol,
+                        SimpleMarkerSymbol) {
+
+                    var symbol = new SimpleMarkerSymbol(
+                        $attrs.style ? $attrs.style : 'circle',
+                        $attrs.size ? $attrs.size : 10,
+                        new SimpleLineSymbol(
+                            SimpleLineSymbol.STYLE_SOLID, 
+                            new Color($attrs.lineColor ? $attrs.lineColor : '#000' ), 
+                            $attrs.lineSize ? $attrs.lineSize : 1),
+                        new Color($attrs.color ? $attrs.color : '#F00' ));
+
+                    symbolDeferred.resolve(symbol);
+                });
+
+                // return the defered that will be resolved with the feature layer
+                this.getSymbol = function () {
+                    return symbolDeferred.promise;
+                };
+            },
+
+            // now we can link our directive to the scope, but we can also add it to the map..
+            link: function (scope, element, attrs, controllers) {
+
+                // controllers is now an array of the controllers from the 'require' option
+                var rendererDirectives = ['esriSimpleRenderer'],
+                    rendererDirective,
+                    symbolController = controllers[0],
+                    rendererController;
+                
+                // searchs for every layer directive found in array, if it's undefined, 
+                // go to the next.
+                for (var i in rendererDirectives){
+                    rendererDirective = rendererDirectives[i];
+                    rendererController = element.parent().controller(rendererDirective);
+                    if (rendererController) { break; }
+                }
+                
+                // gets the renderer controller
+                symbolController.getSymbol().then(function(symbol){
+
+                    // validates if the renderer controller was found
+                    if (rendererController) {
+                        rendererController.getRenderer().then(function (renderer) {                
+                            renderer.symbol = symbol;
+                        });
+                    }
+
+                    // return the layer
+                    return symbol;
+                });
+            }
+        };
+    });
+
+})(angular);
 (function(angular) {
     'use strict';
 

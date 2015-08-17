@@ -19,6 +19,10 @@
                 templateUrl: 'app/examples/feature-layers.html',
                 controller: 'FeatureLayersCtrl'
             })
+            .when('/examples/graphics-layers', {
+                templateUrl: 'app/examples/graphics-layers.html',
+                controller: 'GraphicseLayersCtrl'
+            })
             .when('/examples/web-map', {
                 templateUrl: 'app/examples/web-map.html',
                 controller: 'WebMapCtrl'

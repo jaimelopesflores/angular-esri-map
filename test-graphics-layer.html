@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html ng-app="esri-map-test">
+    <head>
+        <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+        <meta charset="utf-8">
+
+        <!-- compiled and minified CSS -->
+        <link rel="stylesheet" type="text/css" href="//js.arcgis.com/3.14/esri/css/esri.css">
+        
+        <style>
+            html, body, #map{
+                height: 100%;
+                margin: 0;
+                padding: 0;
+                width: 100%;
+            }
+        </style>
+        
+    </head>
+    
+    <body ng-controller="MapController">
+       
+        <esri-map id="map" center="map.center" zoom="map.zoom" basemap="streets" sliderposition="top-right" register-as="myMap">
+            
+            <esri-graphics-layer id="testLayer">
+                
+                <esri-simple-renderer>
+                    <esri-simple-marker-symbol style="square" color="#0f0" size="15" line-size="3" line-color = "#00f"></esri-simple-marker-symbol> 
+                </esri-simple-renderer>
+                                
+            </esri-graphics-layer>
+            
+            
+            <esri-feature-layer url="http://services2.arcgis.com/Az8bZXFPk4TfCJlZ/ArcGIS/rest/services/brasil_municipios/FeatureServer/0">
+
+                <esri-simple-renderer>
+                    <esri-simple-fill-symbol color="#0f0" line-size="3" line-color = "#0FF"></esri-simple-fill-symbol> 
+                </esri-simple-renderer>
+                
+            </esri-feature-layer>
+            
+        </esri-map>
+
+       
+        <!-- scripts JS -->
+        <script type="text/javascript" src="//js.arcgis.com/3.14"></script>
+        <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.3/angular.min.js"></script>
+        <script src="dist/angular-esri-map.js"></script> 
+        <script>
+            angular.module('esri-map-test', ['esri.map']).controller('MapController', function($scope, esriRegistry){
+                $scope.map = {
+                    center: {
+                        lng: -48.478355,
+                        lat: -14.664844
+                    },
+                    zoom: 4
+                };
+                
+                esriRegistry.get('myMap').then(function(map){
+                    require(['esri/graphic'], function(Graphic){
+                        map.on('click', function(evt){
+                            map.getLayer('testLayer').add(new Graphic( evt.mapPoint ));
+                        })
+                    });
+                })
+            });
+        </script>
+        
+        
+        
+    </body>
+</html>

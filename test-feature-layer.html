@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html ng-app="esri-map-test">
+    <head>
+       
+        <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+        <meta charset="utf-8">
+
+        <!-- compiled and minified CSS -->
+        <link rel="stylesheet" type="text/css" href="//js.arcgis.com/3.14/esri/css/esri.css">
+        
+        <style>
+            html, body, #map{
+                height: 100%;
+                margin: 0;
+                padding: 0;
+                width: 100%;
+            }
+        </style>
+        
+    </head>
+    
+    <body ng-controller="MapController">
+       
+        <esri-map id="map" center="map.center" zoom="map.zoom" basemap="streets" sliderposition="top-right" register-as="myMap">
+            
+            
+            
+            
+            <esri-feature-layer url="http://services2.arcgis.com/Az8bZXFPk4TfCJlZ/ArcGIS/rest/services/MapaDoAmor/FeatureServer/1">
+
+                <esri-simple-renderer>
+                    <esri-simple-marker-symbol style="square" color="#0f0" size="15" line-size="3" line-color="#00f"></esri-simple-marker-symbol> 
+                </esri-simple-renderer>
+                
+            </esri-feature-layer>
+            
+            
+            
+        </esri-map>
+
+       
+        <!-- scripts JS -->
+        <script type="text/javascript" src="//js.arcgis.com/3.14"></script>
+        <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.3/angular.min.js"></script>
+        <script src="dist/angular-esri-map.js"></script> 
+        <script>
+            angular.module('esri-map-test', ['esri.map']).controller('MapController', function($scope, esriRegistry){
+                $scope.map = {
+                    center: {
+                        lng: -48.478355,
+                        lat: -14.664844
+                    },
+                    zoom: 4
+                };
+            });
+        </script>
+        
+        
+        
+    </body>
+</html>

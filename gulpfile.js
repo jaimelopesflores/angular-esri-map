@@ -36,8 +36,17 @@ gulp.task('build-js', function() {
     'src/services/esriLoader.js',
     'src/services/esriRegistry.js',
     'src/directives/esriMap.js',
-    'src/directives/esriFeatureLayer.js',
-    'src/directives/esriLegend.js'])
+      
+    'src/directives/layers/esriGraphicsLayer.js',
+    'src/directives/layers/esriFeatureLayer.js',
+    
+    
+    'src/directives/renderers/esriSimpleRenderer.js',
+      
+    'src/directives/symbols/esriSimpleFillSymbol.js',
+    'src/directives/symbols/esriSimpleMarkerSymbol.js',
+      
+    'src/directives/dijit/esriLegend.js'])
     .pipe(concat('angular-esri-map.js'))
     .pipe(gulp.dest('dist'))
     .pipe(gulp.dest('docs/lib'))
@@ -84,4 +93,5 @@ gulp.task('deploy-prod', ['build'], function () {
 });
 
 // Default Task
-gulp.task('default', ['serve']);
+//gulp.task('default', ['serve']);
+gulp.task('default', ['build']);
