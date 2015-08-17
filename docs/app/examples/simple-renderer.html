@@ -1,0 +1,31 @@
+<h2>Simple Renderer with Symbols Example</h2>
+<esri-map id="map" center="map.center" zoom="map.zoom" basemap="streets" sliderposition="top-right" register-as="myMap">
+            
+            <!-- points graphics layer -->
+            <!-- renderized with a simple renderer and symbolized with a dark-blue line on the borde and yellow in the content -->
+            <esri-graphics-layer id="testLayer">
+                <esri-simple-renderer>
+                    <esri-simple-marker-symbol style="square" color="#ff0" size="15" line-size="3" line-color = "#00f"></esri-simple-marker-symbol> 
+                </esri-simple-renderer>
+            </esri-graphics-layer>
+            
+            <!-- polygon feature layer -->
+            <!-- renderized with a simple renderer and symbolized with a blue line on the borde and green in the content -->
+            <esri-feature-layer url="http://services2.arcgis.com/Az8bZXFPk4TfCJlZ/ArcGIS/rest/services/brasil_municipios/FeatureServer/0">
+                <esri-simple-renderer>
+                    <esri-simple-fill-symbol color="#0f0" line-size="3" line-color = "#0FF"></esri-simple-fill-symbol> 
+                </esri-simple-renderer>
+            </esri-feature-layer>
+            
+            <!-- line feature layer -->
+            <!-- renderized with a simple renderer and symbolized with a red line -->
+            <esri-feature-layer url="http://services1.arcgis.com/yx4SuiAAmw4vjwXr/arcgis/rest/services/Linha_Transmiss%C3%A3o/FeatureServer/0">
+                <esri-simple-renderer>
+                    <esri-simple-line-symbol color="#f00" size="3"></esri-simple-line-symbol> 
+                </esri-simple-renderer>                
+            </esri-feature-layer>
+            
+        </esri-map>
+<p><label>Click in the map to add a graphic point</label></p>
+
+<p>Based on <a href="http://jsfiddle.net/jaimelopesflores/2hvw1dut/11/">this JS Fiddle</a>.</p>

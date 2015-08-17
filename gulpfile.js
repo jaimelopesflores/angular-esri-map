@@ -44,6 +44,7 @@ gulp.task('build-js', function() {
     'src/directives/renderers/esriSimpleRenderer.js',
       
     'src/directives/symbols/esriSimpleFillSymbol.js',
+    'src/directives/symbols/esriSimpleLineSymbol.js',
     'src/directives/symbols/esriSimpleMarkerSymbol.js',
       
     'src/directives/dijit/esriLegend.js'])

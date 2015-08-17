@@ -29,3 +29,8 @@ node_modules
 
 # Users Environment Variables
 .lock-wscript
+
+
+# test feature layer and graphics
+test-feature-layer.html
+test-graphics-layer.html

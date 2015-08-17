@@ -21,8 +21,14 @@
             })
             .when('/examples/graphics-layers', {
                 templateUrl: 'app/examples/graphics-layers.html',
-                controller: 'GraphicseLayersCtrl'
+                controller: 'GraphicsLayersCtrl'
             })
+            
+            .when('/examples/simple-renderer', {
+                templateUrl: 'app/examples/simple-renderer.html',
+                controller: 'SimpleRendererCtrl'
+            })
+            
             .when('/examples/web-map', {
                 templateUrl: 'app/examples/web-map.html',
                 controller: 'WebMapCtrl'
